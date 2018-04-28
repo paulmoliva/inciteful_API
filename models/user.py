@@ -1,4 +1,5 @@
 import bcrypt
+import json
 from database import db
 from models import base_model
 
@@ -24,3 +25,22 @@ class User(db.Model, base_model.BaseModel):
         salt = bcrypt.gensalt()
         hashed_pw = bcrypt.hashpw(pw.encode('utf-8'), salt)
         return hashed_pw.decode('utf-8')
+
+    @classmethod
+    def check_password(cls, email, password):
+        found_user = cls.find_by_email(email)
+        if not found_user:
+            return None
+        if bcrypt.checkpw(password, found_user.password.encode('utf-8')):
+            return found_user
+        return None
+
+    def generate_session_token(self):
+        self.session_token = bcrypt.gensalt()
+        self.save()
+
+    def serialize(self):
+        return json.dumps({
+            "email": self.email,
+            "session_token": self.session_token
+        })

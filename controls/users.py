@@ -1,5 +1,5 @@
 import flask
-from exceptions import InvalidUsage
+from exceptions import InvalidUsage, Unauthorized
 from database import db
 from models import user
 import json
@@ -19,6 +19,17 @@ def sign_up():
     hashed_pw = ''
     hashed_pw = user.User.generate_hashed_pw(user_info['password'])
     new_user.password = hashed_pw
-    new_user.save()
+    new_user.generate_session_token()
     db.session.commit()
-    return json.dumps({'email': new_user.email})
+    return new_user.serialize()
+
+
+@user_bp.route('/login', methods=["POST"])
+def login():
+    user_info = flask.request.json
+    found_user = user.User.check_password(user_info["email"], user_info["password"].encode('utf-8'))
+    if not found_user:
+        raise Unauthorized('Invalid email or password', status_code=401)
+    found_user.generate_session_token()
+    db.session.commit()
+    return found_user.serialize()
