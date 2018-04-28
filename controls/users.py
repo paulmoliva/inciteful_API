@@ -2,12 +2,13 @@ import flask
 from exceptions import InvalidUsage
 from database import db
 from models import user
+import json
 
 
 user_bp = flask.Blueprint('user', __name__)
 
 
-@user_bp.route('/api/user', methods=["POST"])
+@user_bp.route('/user', methods=["POST"])
 def sign_up():
     user_info = flask.request.json
     found_user = user.User.find_by_email(user_info['email'])
@@ -20,4 +21,4 @@ def sign_up():
     new_user.password = hashed_pw
     new_user.save()
     db.session.commit()
-    return 'Success!'
+    return json.dumps({'email': new_user.email})

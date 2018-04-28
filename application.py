@@ -3,7 +3,7 @@ from flask import jsonify
 import os
 from flask_cors import CORS
 from models import user
-from controls import users
+import controls
 from database import db
 from exceptions import InvalidUsage
 
@@ -18,8 +18,8 @@ application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.secret_key = os.getenv('SECRET_KEY') or 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 # Register each controls blueprint
-# for bp in controls.ALL_BLUEPRINTS:
-application.register_blueprint(users.user_bp)
+for bp in controls.ALL_BLUEPRINTS:
+    application.register_blueprint(bp)
 
 db.init_app(application)
 
