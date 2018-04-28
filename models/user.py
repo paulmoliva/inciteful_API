@@ -21,6 +21,13 @@ class User(db.Model, base_model.BaseModel):
         return None
 
     @classmethod
+    def find_by_token(cls, token):
+        found_user = cls.query.filter(cls.session_token == token).first()
+        if found_user:
+            return found_user
+        return None
+
+    @classmethod
     def generate_hashed_pw(cls, pw):
         salt = bcrypt.gensalt()
         hashed_pw = bcrypt.hashpw(pw.encode('utf-8'), salt)
@@ -41,6 +48,8 @@ class User(db.Model, base_model.BaseModel):
 
     def serialize(self):
         return json.dumps({
+            "id": self.id,
             "email": self.email,
+            "admin": self.admin,
             "session_token": self.session_token
         })

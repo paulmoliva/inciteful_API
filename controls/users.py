@@ -33,3 +33,17 @@ def login():
     found_user.generate_session_token()
     db.session.commit()
     return found_user.serialize()
+
+
+@user_bp.route('/session', methods=["POST"])
+def session():
+    user_info = flask.request.json
+    found_user = user.User.find_by_token(user_info['token'])
+    if not found_user:
+        return json.dumps({"currentUser": None})
+    return json.dumps({"currentUser": {
+        "id": found_user.id,
+        "email": found_user.email,
+        "admin": found_user.admin,
+        "session_token": found_user.session_token
+    }})
